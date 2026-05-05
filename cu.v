@@ -6,7 +6,7 @@ module cu(
     output reg[7:0] a,
     output reg[7:0] b,
     output reg[2:0] opcode,
-    output alu_en
+    output reg alu_en
 );
 
 reg [18:0] serial_data;
@@ -26,9 +26,9 @@ end
 always @(*) begin
     case (state)
         IDLE: next_state = (start) ? RECIEVING : IDLE;
-        RECIEVING: (count==5'd18) ? SIGNAL : RECIEVING;
+        RECIEVING: next_state = (count==5'd18) ? SIGNAL : RECIEVING;
         SIGNAL: next_state = IDLE;
-        default: 
+        default: next_state = IDLE;
     endcase
 end
 
@@ -58,7 +58,10 @@ always @(posedge clk or negedge arst_n) begin
                 alu_en = 1'b1;
                 count = 0;
             end
-            default: 
+            default: begin
+                count <= 0;
+                alu_en <= 0;
+            end
         endcase
     end
 end
